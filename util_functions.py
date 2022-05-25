@@ -81,9 +81,3 @@ def add_horizontal_lines(image):
     image = cv2.line(np.uint8(image), (0, 195), (image.shape[1], 165), color=0, thickness=1)
     image = cv2.line(np.uint8(image), (0, 225), (image.shape[1], 165), color=0, thickness=1)
     return image
-
-# def numericalSort(value):
-#     numbers = re.compile(r'(\d+)')
-#     parts = numbers.split(value)
-#     parts[1::2] = map(int, parts[1::2])
-#     return parts
