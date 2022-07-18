@@ -1,0 +1,6 @@
+connected_components_3d==3.9.1
+networkx==2.6.3
+nibabel==3.2.2
+numpy==1.22.0
+opencv_contrib_python==4.5.5.64
+scikit_learn==1.1.1

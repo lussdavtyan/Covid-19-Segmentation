@@ -1,13 +1,19 @@
 import cv2
 import numpy as np
 import math
-import re
 import cc3d
 import networkx as nx
 import segmentation_parameters
 import util_functions
 
-def segment_lungs(img):
+
+def segment_lungs(hu_images):
+    segmented_lungs = [segment_lungs_one_slice(image) for image in hu_images]
+    segmented_lungs = np.array(segmented_lungs)
+    segmented_lungs = np.where(segmented_lungs == 0, 0, 1)  
+    return segmented_lungs
+
+def segment_lungs_one_slice(img):
     _, thresholded = cv2.threshold(img, segmentation_parameters.lung_segmentation_threshold, 255, cv2.THRESH_BINARY) 
     thresholded = np.uint8(thresholded)
     body_mask = get_body_mask(img)
@@ -164,15 +170,15 @@ def fill_inside_rib_cage(hu_images, connected_extreme_points_from_centroids_mst)
         x = mean_x
         y = mean_y
         cv2.floodFill(image=flood_filled, mask=None, seedPoint=(int(x), int(y)), newVal=200)
-        extracted = np.where(flood_filled == 200, hu_images[i], -1024)
+        extracted = np.where(flood_filled == 200, 3071, -1024)
         inside_rib_cage.append(extracted)
 
     inside_rib_cage = np.array(inside_rib_cage)
     
     return inside_rib_cage
 
-    
-def segment_rib_cage(hu_images):
+
+def segment_ribs(hu_images):
     body_masks = [get_body_mask(image) for image in hu_images]
     body_masks = np.array(body_masks)
 
@@ -193,16 +199,19 @@ def segment_rib_cage(hu_images):
     segmented_ribs_union = [util_functions.add_horizontal_lines(image) for image in segmented_ribs_union]
 
     segmented_ribs_union = np.array(segmented_ribs_union)
+    return segmented_ribs_union
 
+
+def segment_rib_cage(hu_images):
+    segmented_ribs_union = segment_ribs(hu_images)
     connected_components_stats = [cv2.connectedComponentsWithStats(np.uint8(image)) for image in segmented_ribs_union]
-
     extreme_points_all_slices = get_extreme_points(segmented_ribs_union, connected_components_stats)
     mst_list = construct_mst(segmented_ribs_union, connected_components_stats)
     mst_list = complete_the_cycle(mst_list)
 
     connected_extreme_points_from_centroids_mst = connect_extreme_points(segmented_ribs_union, mst_list, extreme_points_all_slices)
     inside_rib_cage = fill_inside_rib_cage(hu_images, connected_extreme_points_from_centroids_mst)
-
+    inside_rib_cage = np.where(inside_rib_cage == -1024, 0, 1)
     return inside_rib_cage
 
 

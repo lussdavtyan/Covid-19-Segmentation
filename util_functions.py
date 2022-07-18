@@ -1,10 +1,19 @@
 import cv2
 import numpy as np
 import math
-import re
-import cc3d
-import networkx as nx
-import segmentation_parameters
+import nibabel as nib
+import os
+
+def load_nii_files(path):
+    img = nib.load(os.path.join(path))
+    image_data = img.get_fdata()
+    image_data = np.moveaxis(image_data, -1, 0)  
+    images = []
+    for image in image_data:
+        images.append(cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE))
+    images = np.array(images)
+
+    return images
 
 def threshold_by_three_levels(extracted_lung_slice, t1, t2):
     _, thresholded_infection1 = cv2.threshold(np.int16(extracted_lung_slice), t1, 255, cv2.THRESH_BINARY)
