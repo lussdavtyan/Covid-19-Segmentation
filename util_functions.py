@@ -90,3 +90,13 @@ def add_horizontal_lines(image):
     image = cv2.line(np.uint8(image), (0, 195), (image.shape[1], 165), color=0, thickness=1)
     image = cv2.line(np.uint8(image), (0, 225), (image.shape[1], 165), color=0, thickness=1)
     return image
+
+def print_evaluation_results(dice_list_lungs, jaccard_list_lungs, precision_list, recall_list, dice_list_inf, jaccard_list_inf, rmse1, rmse2):
+    print("Lung segmentation evaluation")
+    print("Dice: ", np.mean(dice_list_lungs), "Jaccard: ", np.mean(jaccard_list_lungs))
+    print("Rib cage segmentation evaluation")
+    print("Precision: ", np.mean(precision_list), "Recall: ", np.mean(recall_list))
+    print("Infection segmentation evaluation")
+    print("Dice: ", np.mean(dice_list_inf), "Jaccard: ", np.mean(jaccard_list_inf))
+    print("Infection quantification evaluation")
+    print("version1: ", rmse1, "version2: ", rmse2)

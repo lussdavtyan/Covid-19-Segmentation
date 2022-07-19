@@ -117,14 +117,7 @@ for path in img_file_paths:
     rmse2_ = performance_metrics.rmse(np.array(inf_proportion_list_pr2_), np.array(inf_proportion_list_gt2_))
 
     print(path)
-    print("Lung segmentation evaluation")
-    print("Dice: ", np.mean(dice_list_lungs_), "Jaccard: ", np.mean(jaccard_list_lungs_))
-    print("Rib cage segmentation evaluation")
-    print("Precision: ", np.mean(precision_list_), "Recall: ", np.mean(recall_list_))
-    print("Infection segmentation evaluation")
-    print("Dice: ", np.mean(dice_list_inf_), "Jaccard: ", np.mean(jaccard_list_inf_))
-    print("Infection quantification evaluation")
-    print("version1: ", rmse1_, "version2: ", rmse2_)
+    util_functions.print_evaluation_results(dice_list_lungs_, jaccard_list_lungs_, precision_list_, recall_list_, dice_list_inf_, jaccard_list_inf_, rmse1_, rmse2_)
     print()
 
 
@@ -139,11 +132,4 @@ rmse2 = performance_metrics.rmse(np.array(inf_proportion_list_pr2), np.array(inf
 
 
 print("\nAverage results of all cases")
-print("Lung segmentation evaluation")
-print("Dice: ", np.mean(dice_list_lungs), "Jaccard: ", np.mean(jaccard_list_lungs))
-print("Rib cage segmentation evaluation")
-print("Precision: ", np.mean(precision_list), "Recall: ", np.mean(recall_list))
-print("Infection segmentation evaluation")
-print("Dice: ", np.mean(dice_list_inf), "Jaccard: ", np.mean(jaccard_list_inf))
-print("Infection quantification evaluation")
-print("version1: ", rmse1, "version2: ", rmse2)
+util_functions.print_evaluation_results(dice_list_lungs, jaccard_list_lungs, precision_list, recall_list, dice_list_inf, jaccard_list_inf, rmse1, rmse2)
