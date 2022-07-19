@@ -25,28 +25,28 @@ img_file_paths = [f for f in os.listdir(img_path) if re.match(r'^coronacases', f
 lung_mask_file_paths = [f for f in os.listdir(img_path) if re.match(r'^coronacases', f)]
 inf_mask_file_paths = [f for f in os.listdir(img_path) if re.match(r'^coronacases', f)]
 
-inf_proportion_list_gt1 = []
-inf_proportion_list_pr1 = []
-inf_proportion_list_gt2 = []
-inf_proportion_list_pr2 = []
-dice_list_lungs = []
-jaccard_list_lungs = []
-recall_list = []
-precision_list = []
-dice_list_inf = []
-jaccard_list_inf = []
+inf_proportion_gt1 = np.array([])
+inf_proportion_pr1 = np.array([])
+inf_proportion_gt2 = np.array([])
+inf_proportion_pr2 = np.array([])
+dice_lungs = np.array([])
+jaccard_lungs = np.array([])
+recall_rib_cage = np.array([])
+precision_rib_cage = np.array([])
+dice_infection = np.array([])
+jaccard_infection = np.array([])
 
 for path in img_file_paths:
-    inf_proportion_list_gt1_ = []
-    inf_proportion_list_pr1_ = []
-    inf_proportion_list_gt2_ = []
-    inf_proportion_list_pr2_ = []
-    dice_list_lungs_ = []
-    jaccard_list_lungs_ = []
-    recall_list_ = []
-    precision_list_ = []
-    dice_list_inf_ = []
-    jaccard_list_inf_ = []
+    inf_proportion_gt1_ = np.array([])
+    inf_proportion_pr1_ = np.array([])
+    inf_proportion_gt2_ = np.array([])
+    inf_proportion_pr2_ = np.array([])
+    dice_lungs_ = np.array([])
+    jaccard_lungs_ = np.array([])
+    recall_rib_cage_ = np.array([])
+    precision_rib_cage_ = np.array([])
+    dice_infection_ = np.array([])
+    jaccard_infection_ = np.array([])
 
     hu_images = util_functions.load_nii_files(os.path.join(img_path, path))
     lung_masks = util_functions.load_nii_files(os.path.join(lung_mask_path, path))
@@ -68,68 +68,57 @@ for path in img_file_paths:
     for im_true, im_test in zip(lung_masks, segmented_lungs):
         dice = performance_metrics.dice_coef(im_true, im_test)
         jaccard = jaccard_score(im_true, im_test, average='micro')
-        dice_list_lungs.append(dice)
-        jaccard_list_lungs.append(jaccard)
-        dice_list_lungs_.append(dice)
-        jaccard_list_lungs_.append(jaccard)
+        dice_lungs = np.append(dice_lungs, dice)
+        jaccard_lungs = np.append(jaccard_lungs, jaccard)
+        dice_lungs_ = np.append(dice_lungs_, dice)
+        jaccard_lungs_ = np.append(jaccard_lungs_, jaccard)
         
     for im_true, im_test in zip(lung_masks, segmented_rib_cage):
         im_true = im_true.astype('int64')
         recall = performance_metrics.get_recall(im_true, im_test)
         precision = performance_metrics.get_precision(im_true, im_test)
-        precision_list.append(precision)
-        recall_list.append(recall)
-        precision_list_.append(precision)
-        recall_list_.append(recall)
+        precision_rib_cage = np.append(precision_rib_cage, precision)
+        recall_rib_cage = np.append(recall_rib_cage, recall)
+        precision_rib_cage_ = np.append(precision_rib_cage_, precision)
+        recall_rib_cage_ = np.append(recall_rib_cage_, recall)
         
     for im_true, im_test in zip(inf_masks, thresholded):
         dice = performance_metrics.dice_coef(im_true, im_test)
         jaccard = jaccard_score(im_true, im_test, average='micro')
-        dice_list_inf.append(dice)
-        jaccard_list_inf.append(jaccard)
-        dice_list_inf_.append(dice)
-        jaccard_list_inf_.append(jaccard)
+        dice_infection = np.append(dice_infection, dice)
+        jaccard_infection = np.append(jaccard_infection, jaccard)
+        dice_infection_ = np.append(dice_infection_, dice)
+        jaccard_infection_ = np.append(jaccard_infection_, jaccard)
         
     for im_true, im_test in zip(inf_masks, lung_masks):
         iou = performance_metrics.int_over_union(im_true, im_test)
-        inf_proportion_list_gt1.append(iou)
-        inf_proportion_list_gt1_.append(iou)
+        inf_proportion_gt1 = np.append(inf_proportion_gt1, iou)
+        inf_proportion_gt1_ = np.append(inf_proportion_gt1_, iou)
         iou = performance_metrics.int_over_lung_area(im_true, im_test)
-        inf_proportion_list_gt2.append(iou)
-        inf_proportion_list_gt2_.append(iou)
+        inf_proportion_gt2 = np.append(inf_proportion_gt2, iou)
+        inf_proportion_gt2_ = np.append(inf_proportion_gt2_, iou)
         
 
     for im_true, im_test in zip(thresholded, segmented_lungs):
         iou = performance_metrics.int_over_union(im_true, im_test)
-        inf_proportion_list_pr1.append(iou)   
-        inf_proportion_list_pr1_.append(iou)   
+        inf_proportion_pr1 = np.append(inf_proportion_pr1, iou)   
+        inf_proportion_pr1_ = np.append(inf_proportion_pr1_, iou)   
         iou = performance_metrics.int_over_lung_area(im_true, im_test)
-        inf_proportion_list_pr2.append(iou)
-        inf_proportion_list_pr2_.append(iou)
+        inf_proportion_pr2 = np.append(inf_proportion_pr2, iou)
+        inf_proportion_pr2_ = np.append(inf_proportion_pr2_, iou)
         
-    dice_list_lungs_ = np.array(dice_list_lungs_)
-    jaccard_list_lungs_ = np.array(jaccard_list_lungs_)
-    precision_list_ = np.array(precision_list_)
-    recall_list_ = np.array(recall_list_)
-    dice_list_inf_ = np.array(dice_list_inf_)
-    jaccard_list_inf_ = np.array(jaccard_list_inf_)
-    rmse1_ = performance_metrics.rmse(np.array(inf_proportion_list_pr1_), np.array(inf_proportion_list_gt1_))
-    rmse2_ = performance_metrics.rmse(np.array(inf_proportion_list_pr2_), np.array(inf_proportion_list_gt2_))
+   
+    rmse1_ = performance_metrics.rmse(inf_proportion_pr1_, inf_proportion_gt1_)
+    rmse2_ = performance_metrics.rmse(inf_proportion_pr2_, inf_proportion_gt2_)
 
     print(path)
-    util_functions.print_evaluation_results(dice_list_lungs_, jaccard_list_lungs_, precision_list_, recall_list_, dice_list_inf_, jaccard_list_inf_, rmse1_, rmse2_)
+    util_functions.print_evaluation_results(dice_lungs_, jaccard_lungs_, precision_rib_cage_, recall_rib_cage_, dice_infection_, jaccard_infection_, rmse1_, rmse2_)
     print()
 
 
-dice_list_lungs = np.array(dice_list_lungs)
-jaccard_list_lungs = np.array(jaccard_list_lungs)
-precision_list = np.array(precision_list)
-recall_list = np.array(recall_list)
-dice_list_inf = np.array(dice_list_inf)
-jaccard_list_inf = np.array(jaccard_list_inf)
-rmse1 = performance_metrics.rmse(np.array(inf_proportion_list_pr1), np.array(inf_proportion_list_gt1))
-rmse2 = performance_metrics.rmse(np.array(inf_proportion_list_pr2), np.array(inf_proportion_list_gt2))    
+rmse1 = performance_metrics.rmse(inf_proportion_pr1, inf_proportion_gt1)
+rmse2 = performance_metrics.rmse(inf_proportion_pr2, inf_proportion_gt2)    
 
 
 print("\nAverage results of all cases")
-util_functions.print_evaluation_results(dice_list_lungs, jaccard_list_lungs, precision_list, recall_list, dice_list_inf, jaccard_list_inf, rmse1, rmse2)
+util_functions.print_evaluation_results(dice_lungs, jaccard_lungs, precision_rib_cage, recall_rib_cage, dice_infection, jaccard_infection, rmse1, rmse2)
